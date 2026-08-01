@@ -67,7 +67,7 @@
     justify-content:space-between;
     padding: 28px 40px 18px;
     border-bottom: 1px solid var(--rule);
-    max-width: 920px;
+    max-width: 1360px;
     margin: 0 auto;
   }
 
@@ -123,7 +123,7 @@
   }
 
   main{
-    max-width: 920px;
+    max-width: 1360px;
     margin: 0 auto;
     padding: 32px 40px;
   }
@@ -182,15 +182,34 @@
 
   .btn-sm{ padding:6px 12px; font-size:12px; }
 
-  /* --- Layout: sumário separado do painel de leitura --- */
+  /* --- Layout: sumário na lateral, leitura/edição centralizada --- */
   .library-layout{
-    display:grid;
-    grid-template-columns: 300px 1fr;
-    gap: 28px;
-    align-items: start;
+    display:flex;
+    align-items:flex-start;
+    gap: 40px;
+  }
+  .toc-panel{
+    width: 260px;
+    flex-shrink: 0;
+  }
+  .reading-panel{
+    flex: 1;
+    min-width: 0;
+  }
+  .reading-panel-inner, .reading-empty{
+    max-width: 760px;
+    margin: 0 auto;
   }
 
   /* --- Sumário (lista de capítulos) --- */
+  .toc-category{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    color:var(--ink-soft);
+    padding: 18px 4px 8px;
+  }
+  .toc-category:first-child{ padding-top:4px; }
   .spine-list{
     list-style:none;
     margin:0; padding:0;
@@ -204,22 +223,14 @@
   .chapter-head{
     display:flex;
     align-items:center;
-    gap:14px;
+    gap:12px;
     padding: 14px 16px;
     cursor:pointer;
     user-select:none;
   }
-  .chapter-head .num{
-    font-family:var(--display, inherit);
-    font-size:12px;
-    color:var(--gold);
-    width:26px;
-    flex-shrink:0;
-    letter-spacing:.05em;
-  }
   .chapter-head .title-block{ flex:1; min-width:0; }
   .chapter-head .title{
-    font-size:15.5px;
+    font-size:16.5px;
     font-weight:600;
     color:var(--ink);
     white-space:nowrap;
@@ -245,6 +256,25 @@
   }
   .chapter.active .chapter-head .chev{ transform: rotate(90deg); opacity:1; }
   .chapter.active .chapter-head .title{ color: var(--leather); }
+
+  .reorder-btns{
+    display:flex;
+    flex-direction:column;
+    gap:1px;
+    flex-shrink:0;
+  }
+  .reorder-btns button{
+    width:18px; height:14px;
+    border:none;
+    background:transparent;
+    color:var(--ink-soft);
+    cursor:pointer;
+    font-size:9px;
+    line-height:1;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .reorder-btns button:hover{ color:var(--leather); }
+  .reorder-btns button:disabled{ opacity:.25; cursor:default; }
 
   .chapter-actions{
     display:flex;
@@ -301,8 +331,10 @@
   .reading-empty h3{ margin:0 0 6px; color:var(--ink); font-weight:600; }
 
   @media (max-width: 860px){
-    .library-layout{ grid-template-columns: 1fr; }
-    .reading-panel{ position: static; }
+    .library-layout{ flex-direction: column; }
+    .toc-panel{ width: 100%; }
+    .reading-panel{ position: static; width: 100%; }
+    .reading-panel-inner, .reading-empty{ max-width: none; }
   }
 
   .reading-content{
@@ -433,7 +465,6 @@
   @media (max-width:640px){
     header.topbar, main{ padding-left:18px; padding-right:18px; }
     .reading-panel-inner{ padding: 22px 20px 28px; }
-    .chapter-head .num{ display:none; }
   }
 
   /* --- Autenticação --- */
@@ -771,6 +802,7 @@
     const { data, error } = await supabase
       .from('chapters')
       .select('*')
+      .order('order_index', { ascending: true, nullsFirst: false })
       .order('seq', { ascending: true });
     if(error){
       console.error(error);
@@ -780,6 +812,48 @@
     }
     ready = true;
     render();
+  }
+
+  // Agrupa os capítulos por categoria, preservando a ordem manual dentro de cada grupo.
+  // Se nenhum capítulo tiver categoria, retorna um único grupo sem cabeçalho (lista simples).
+  function getGroups(){
+    const hasCategories = chapters.some(c => (c.category || '').trim().length > 0);
+    if(!hasCategories){
+      return [{ name: null, items: chapters.slice() }];
+    }
+    const map = new Map();
+    chapters.forEach(c=>{
+      const key = (c.category || '').trim() || '__sem_categoria__';
+      if(!map.has(key)) map.set(key, []);
+      map.get(key).push(c);
+    });
+    const namedKeys = [...map.keys()].filter(k => k !== '__sem_categoria__');
+    const groups = namedKeys.map(k => ({ name: k, items: map.get(k) }));
+    if(map.has('__sem_categoria__')){
+      groups.push({ name: 'Sem categoria', items: map.get('__sem_categoria__') });
+    }
+    return groups;
+  }
+
+  async function moveChapter(ch, siblings, direction){
+    const idx = siblings.findIndex(c => c.id === ch.id);
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if(swapIdx < 0 || swapIdx >= siblings.length) return;
+    const other = siblings[swapIdx];
+    const a = ch.order_index ?? 0;
+    const b = other.order_index ?? 0;
+    try{
+      await supabase.from('chapters').update({ order_index: b }).eq('id', ch.id);
+      await supabase.from('chapters').update({ order_index: a }).eq('id', other.id);
+      await loadChapters();
+    }catch(err){
+      alert('Não foi possível reordenar: ' + err.message);
+    }
+  }
+
+  function nextOrderIndex(){
+    const max = chapters.reduce((m, c) => Math.max(m, c.order_index ?? 0), 0);
+    return max + 1;
   }
 
   function formatDate(iso){
@@ -823,14 +897,27 @@
       return;
     }
 
-    const ul = document.createElement('ul');
-    ul.className = 'spine-list';
-    chapters.forEach((ch, idx) => ul.appendChild(buildTocItem(ch, idx)));
+    const groups = getGroups();
+    const frag = document.createDocumentFragment();
+
+    groups.forEach(group=>{
+      if(group.name){
+        const heading = document.createElement('div');
+        heading.className = 'toc-category';
+        heading.textContent = group.name;
+        frag.appendChild(heading);
+      }
+      const ul = document.createElement('ul');
+      ul.className = 'spine-list';
+      group.items.forEach(ch => ul.appendChild(buildTocItem(ch, group.items)));
+      frag.appendChild(ul);
+    });
+
     listContainer.innerHTML = '';
-    listContainer.appendChild(ul);
+    listContainer.appendChild(frag);
   }
 
-  function buildTocItem(ch, idx){
+  function buildTocItem(ch, siblings){
     const li = document.createElement('li');
     const isActive = (openId === ch.id) || (editingId === ch.id);
     li.className = 'chapter' + (isActive ? ' active' : '');
@@ -839,13 +926,29 @@
     head.className = 'chapter-head';
     head.innerHTML = `
       <span class="chev">❯</span>
-      <span class="num">${String(idx+1).padStart(2,'0')}</span>
       <span class="title-block">
         <div class="title">${escapeHtml(ch.title || 'Sem título')}</div>
         <div class="meta">Atualizado em ${formatDate(ch.updated_at)}</div>
       </span>
     `;
     if(isAdmin){
+      const idxInSiblings = siblings.findIndex(c => c.id === ch.id);
+      const reorder = document.createElement('div');
+      reorder.className = 'reorder-btns';
+      reorder.innerHTML = `
+        <button type="button" data-act="up" ${idxInSiblings === 0 ? 'disabled' : ''} title="Mover para cima">▲</button>
+        <button type="button" data-act="down" ${idxInSiblings === siblings.length - 1 ? 'disabled' : ''} title="Mover para baixo">▼</button>
+      `;
+      head.appendChild(reorder);
+      reorder.querySelector('[data-act="up"]').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        moveChapter(ch, siblings, 'up');
+      });
+      reorder.querySelector('[data-act="down"]').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        moveChapter(ch, siblings, 'down');
+      });
+
       const actions = document.createElement('div');
       actions.className = 'chapter-actions';
       actions.innerHTML = `
@@ -953,6 +1056,10 @@
 
     const titleId = 'title_' + (isNew ? 'new' : ch.id);
     const rteId = 'rte_' + (isNew ? 'new' : ch.id);
+    const catId = 'cat_' + (isNew ? 'new' : ch.id);
+    const catListId = 'catlist_' + (isNew ? 'new' : ch.id);
+
+    const existingCategories = [...new Set(chapters.map(c => (c.category||'').trim()).filter(Boolean))];
 
     wrap.innerHTML = `
       <div class="reading-topbar" style="border-bottom:none; margin-bottom:6px; padding-bottom:0;">
@@ -960,6 +1067,12 @@
       </div>
       <span class="field-label">Título do capítulo</span>
       <input type="text" class="title-input" id="${titleId}" placeholder="Ex.: Capítulo 1 — O começo" value="${isNew ? '' : escapeAttr(ch.title || '')}" />
+
+      <span class="field-label">Categoria (opcional)</span>
+      <input type="text" class="title-input" style="font-size:15px; margin-bottom:22px;" id="${catId}" list="${catListId}" placeholder="Ex.: Arco 1, Parte I..." value="${isNew ? '' : escapeAttr(ch.category || '')}" />
+      <datalist id="${catListId}">
+        ${existingCategories.map(c => `<option value="${escapeAttr(c)}"></option>`).join('')}
+      </datalist>
 
       <span class="field-label">Texto</span>
       <div class="toolbar" data-target="${rteId}">
@@ -1014,6 +1127,7 @@
     wrap.querySelector('[data-act="save"]').addEventListener('click', async ()=>{
       const titleVal = document.getElementById(titleId).value.trim();
       const contentVal = document.getElementById(rteId).innerHTML;
+      const categoryVal = document.getElementById(catId).value.trim();
       if(!titleVal){
         alert('Dê um título ao capítulo antes de salvar.');
         document.getElementById(titleId).focus();
@@ -1028,7 +1142,7 @@
         if(isNew){
           const { data, error } = await supabase
             .from('chapters')
-            .insert({ title: titleVal, content: contentVal })
+            .insert({ title: titleVal, content: contentVal, category: categoryVal || null, order_index: nextOrderIndex() })
             .select()
             .single();
           if(error) throw error;
@@ -1036,7 +1150,7 @@
         } else {
           const { error } = await supabase
             .from('chapters')
-            .update({ title: titleVal, content: contentVal, updated_at: new Date().toISOString() })
+            .update({ title: titleVal, content: contentVal, category: categoryVal || null, updated_at: new Date().toISOString() })
             .eq('id', ch.id);
           if(error) throw error;
           openId = ch.id;
@@ -1117,7 +1231,7 @@
     const originalLabel = exportBtn.textContent;
     exportBtn.textContent = 'Compactando…';
     try{
-      const backupData = chapters.map(c => ({ title: c.title, content: minifyHtml(c.content) }));
+      const backupData = chapters.map(c => ({ title: c.title, category: c.category || null, content: minifyHtml(c.content) }));
       const jsonStr = JSON.stringify(backupData);
       const rawSize = new Blob([jsonStr]).size;
       const dateStr = new Date().toISOString().slice(0,10);
@@ -1193,11 +1307,12 @@
 
     const rows = [];
     let skipped = 0;
+    let nextIdx = nextOrderIndex();
     sorted.forEach(item=>{
       const title = (item.title || 'Sem título').trim();
       const titleKey = title.toLowerCase();
       if(existingTitles.has(titleKey)){ skipped++; return; }
-      rows.push({ title, content: textToHtml(item.content) });
+      rows.push({ title, content: textToHtml(item.content), category: item.category || null, order_index: nextIdx++ });
       existingTitles.add(titleKey);
     });
 
