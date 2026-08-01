@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Law of Hunting — Lout of Count's Family Pt2</title>
+<style>
+  :root{
+    --paper:#FAF6EC;
+    --ink:#000000;
+    --ink-soft:#5c4545;
+    --leather:#9e0000;
+    --leather-deep:#700000;
+    --gold:#a70000;
+    --rule:#DCD0B8;
+    --card:#FFFDF7;
+    --danger:#A6432F;
+    --shadow: 0 1px 0 rgba(43,36,28,.06);
+    --radius: 3px;
+  }
+
+  body.theme-dark{
+    --paper:#181510;
+    --ink:#ffffff;
+    --ink-soft:#b68a8a;
+    --leather:#9e0000;
+    --leather-deep:#700000;
+    --gold:#a70000;
+    --rule:#3A3225;
+    --card:#211C15;
+    --danger:#E0765F;
+    --shadow: 0 1px 0 rgba(0,0,0,.4);
+  }
+
+  body.theme-sepia{
+    --paper:#EFE0C0;
+    --ink:#000000;
+    --ink-soft:#774a4a;
+    --leather:#9e0000;
+    --leather-deep:#700000;
+    --gold:#a70000;
+    --rule:#D6C293;
+    --card:#F7ECD3;
+    --danger:#8c2424;
+    --shadow: 0 1px 0 rgba(74,56,38,.12);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+    transition: background .35s ease, color .35s ease;
+    min-height:100vh;
+    padding-bottom:80px;
+  }
+
+  .display{
+    font-family: Didot, "Bodoni MT", "Playfair Display", Georgia, serif;
+    letter-spacing:.02em;
+  }
+
+  header.topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 28px 40px 18px;
+    border-bottom: 1px solid var(--rule);
+    max-width: 920px;
+    margin: 0 auto;
+  }
+
+  .brand{
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+  }
+  .brand .mark{
+    font-size:34px;
+    font-weight:700;
+    color: var(--leather);
+  }
+  .brand h1{
+    font-size:22px;
+    margin:0;
+    font-weight:600;
+    letter-spacing:.03em;
+  }
+  .brand .sub{
+    color:var(--ink-soft);
+    font-size:12.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    margin-top:2px;
+  }
+
+  .theme-switch{
+    display:flex;
+    gap:6px;
+    border:1px solid var(--rule);
+    border-radius: 20px;
+    padding:4px;
+    background:var(--card);
+  }
+  .theme-switch button{
+    width:34px;height:34px;
+    border-radius:50%;
+    border:none;
+    background:transparent;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;
+    color:var(--ink-soft);
+    transition: background .2s, color .2s;
+  }
+  .theme-switch button.active{
+    background:var(--leather);
+    color:var(--card);
+  }
+  .theme-switch button:hover:not(.active){
+    color:var(--ink);
+  }
+
+  main{
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 32px 40px;
+  }
+
+  .toc-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom: 18px;
+  }
+  .toc-header .eyebrow{
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .toc-header h2{
+    margin:2px 0 0;
+    font-size:26px;
+    font-weight:600;
+  }
+
+  .btn{
+    font-family:inherit;
+    cursor:pointer;
+    border-radius:var(--radius);
+    padding:10px 18px;
+    font-size:13.5px;
+    letter-spacing:.03em;
+    border:1px solid var(--leather);
+    background:transparent;
+    color:var(--leather);
+    transition: background .18s, color .18s, transform .05s;
+  }
+  .btn:hover{ background:var(--leather); color:var(--card); }
+  .btn:active{ transform: translateY(1px); }
+
+  .btn-solid{
+    background:var(--leather);
+    color:var(--card);
+    border-color:var(--leather);
+  }
+  .btn-solid:hover{ background:var(--leather-deep); border-color:var(--leather-deep); }
+
+  .btn-ghost{
+    border-color: var(--rule);
+    color:var(--ink-soft);
+  }
+  .btn-ghost:hover{ background:var(--rule); color:var(--ink); }
+
+  .btn-danger{
+    border-color:var(--danger);
+    color:var(--danger);
+  }
+  .btn-danger:hover{ background:var(--danger); color:#fff; }
+
+  .btn-sm{ padding:6px 12px; font-size:12px; }
+
+  /* --- Layout: sumário separado do painel de leitura --- */
+  .library-layout{
+    display:grid;
+    grid-template-columns: 300px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  /* --- Sumário (lista de capítulos) --- */
+  .spine-list{
+    list-style:none;
+    margin:0; padding:0;
+    border-top: 1px solid var(--rule);
+  }
+  .chapter{
+    border-bottom: 1px solid var(--rule);
+    background: var(--card);
+    box-shadow: var(--shadow);
+  }
+  .chapter-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding: 14px 16px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .chapter-head .num{
+    font-family:var(--display, inherit);
+    font-size:12px;
+    color:var(--gold);
+    width:26px;
+    flex-shrink:0;
+    letter-spacing:.05em;
+  }
+  .chapter-head .title-block{ flex:1; min-width:0; }
+  .chapter-head .title{
+    font-size:15.5px;
+    font-weight:600;
+    color:var(--ink);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .chapter-head .meta{
+    font-size:11px;
+    color: var(--ink-soft);
+    margin-top:2px;
+    letter-spacing:.03em;
+  }
+  .chapter-head .chev{
+    color:var(--leather);
+    font-size:13px;
+    transition: transform .2s ease, opacity .2s ease;
+    flex-shrink:0;
+    opacity:.55;
+  }
+  .chapter.active{
+    background: var(--paper);
+    box-shadow: inset 3px 0 0 var(--leather);
+  }
+  .chapter.active .chapter-head .chev{ transform: rotate(90deg); opacity:1; }
+  .chapter.active .chapter-head .title{ color: var(--leather); }
+
+  .chapter-actions{
+    display:flex;
+    gap:6px;
+    flex-shrink:0;
+  }
+
+  /* --- Painel de leitura (independente da lista) --- */
+  .reading-panel{
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    min-height: 420px;
+    position: sticky;
+    top: 20px;
+  }
+  .reading-panel-inner{
+    padding: 30px 36px 36px;
+  }
+  .reading-topbar{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+    border-bottom: 1px dashed var(--rule);
+  }
+  .reading-topbar .chapter-title{
+    font-size: 26px;
+    font-weight:600;
+    margin:0 0 4px;
+    color:var(--ink);
+  }
+  .reading-topbar .meta{
+    font-size:12px;
+    color:var(--ink-soft);
+    letter-spacing:.03em;
+  }
+  .reading-topbar .chapter-actions{ flex-shrink:0; padding-top:2px; }
+
+  .reading-empty{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    min-height: 420px;
+    color: var(--ink-soft);
+    padding: 40px 30px;
+  }
+  .reading-empty .mark{ font-size:38px; color:var(--leather); margin-bottom:14px; }
+  .reading-empty h3{ margin:0 0 6px; color:var(--ink); font-weight:600; }
+
+  @media (max-width: 860px){
+    .library-layout{ grid-template-columns: 1fr; }
+    .reading-panel{ position: static; }
+  }
+
+  .reading-content{
+    font-size:17px;
+    line-height:1.85;
+    color: var(--ink);
+  }
+  .reading-content p{ margin: 0 0 1em; }
+  .reading-content h1,.reading-content h2,.reading-content h3{
+    font-family: Didot, "Bodoni MT", "Playfair Display", Georgia, serif;
+    color:var(--ink);
+  }
+  .reading-content blockquote{
+    margin: 1em 0;
+    padding: 6px 0 6px 16px;
+    border-left: 3px solid var(--leather);
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+  .reading-content a{ color: var(--leather); }
+  .empty-note{
+    color:var(--ink-soft);
+    font-style:italic;
+    font-size:14px;
+  }
+
+  /* --- Editor --- */
+  .editor-wrap{ padding-top:10px; }
+  .field-label{
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+    display:block;
+  }
+  input.title-input{
+    width:100%;
+    font-family: Didot, "Bodoni MT", "Playfair Display", Georgia, serif;
+    font-size:22px;
+    padding:8px 2px;
+    border:none;
+    border-bottom: 1px solid var(--rule);
+    background:transparent;
+    color:var(--ink);
+    margin-bottom:18px;
+    outline:none;
+  }
+  input.title-input:focus{ border-bottom-color: var(--leather); }
+
+  .toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:4px;
+    padding:8px;
+    border:1px solid var(--rule);
+    border-bottom:none;
+    background: var(--paper);
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .toolbar button{
+    width:32px; height:30px;
+    border:1px solid transparent;
+    background:transparent;
+    color:var(--ink);
+    border-radius:3px;
+    cursor:pointer;
+    font-size:14px;
+    font-family: Georgia, serif;
+  }
+  .toolbar button:hover{ background:var(--rule); }
+  .toolbar .sep{
+    width:1px;
+    background:var(--rule);
+    margin:3px 5px;
+  }
+
+  .rte{
+    min-height:260px;
+    max-height:520px;
+    overflow-y:auto;
+    border:1px solid var(--rule);
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding:16px 18px;
+    background:var(--card);
+    font-size:16.5px;
+    line-height:1.8;
+    outline:none;
+  }
+  .rte:empty:before{
+    content: attr(data-placeholder);
+    color: var(--ink-soft);
+    font-style:italic;
+  }
+  .rte blockquote{
+    margin: 1em 0;
+    padding: 4px 0 4px 14px;
+    border-left: 3px solid var(--leather);
+    color: var(--ink-soft);
+    font-style:italic;
+  }
+
+  .editor-footer{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:16px;
+  }
+
+  .empty-state{
+    text-align:center;
+    padding: 60px 20px;
+    color: var(--ink-soft);
+  }
+  .empty-state .mark{ font-size:40px; color:var(--leather); display:block; margin-bottom:14px; }
+  .empty-state h3{ margin:0 0 6px; color:var(--ink); font-weight:600; }
+
+  .loading-note{
+    text-align:center;
+    padding: 40px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  ::-webkit-scrollbar{ width:9px; }
+  ::-webkit-scrollbar-thumb{ background: var(--rule); border-radius:6px; }
+
+  @media (max-width:640px){
+    header.topbar, main{ padding-left:18px; padding-right:18px; }
+    .reading-panel-inner{ padding: 22px 20px 28px; }
+    .chapter-head .num{ display:none; }
+  }
+
+  /* --- Autenticação --- */
+  .hidden{ display:none !important; }
+  .auth-screen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .auth-card{
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:40px 36px;
+    max-width:380px;
+    width:100%;
+  }
+  .auth-card .mark{ font-size:30px; color:var(--leather); display:block; margin-bottom:10px; }
+  .auth-card h2{ margin:0 0 6px; font-size:23px; }
+  .auth-card .sub{ color:var(--ink-soft); font-size:13px; margin-bottom:24px; line-height:1.5; }
+  .auth-field{ margin-bottom:16px; }
+  .auth-field label{ display:block; font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-soft); margin-bottom:6px; }
+  .auth-field input{
+    width:100%; padding:10px 12px; border:1px solid var(--rule); border-radius:var(--radius);
+    background:var(--paper); color:var(--ink); font-family:inherit; font-size:14px; outline:none;
+  }
+  .auth-field input:focus{ border-color:var(--leather); }
+  .auth-error{
+    color:var(--danger); font-size:13px; margin:-6px 0 14px;
+    display:none; line-height:1.4;
+  }
+  .auth-msg{
+    color:var(--ink-soft); font-size:13px; margin:-6px 0 14px; display:none; line-height:1.4;
+  }
+  .auth-submit{ width:100%; margin-top:4px; }
+  .auth-switch{ margin-top:20px; font-size:13px; color:var(--ink-soft); text-align:center; }
+  .auth-switch a{ color:var(--leather); cursor:pointer; text-decoration:underline; }
+  .auth-pending .mark{ font-size:42px; color:var(--leather); margin-bottom:16px; display:block; text-align:center; }
+  .auth-pending h2{ text-align:center; }
+  .auth-pending .sub{ text-align:center; }
+  .auth-pending .btn{ width:100%; margin-top:8px; }
+
+  .user-badge{
+    font-size:12px;
+    color:var(--ink-soft);
+    letter-spacing:.03em;
+    margin-right:10px;
+    white-space:nowrap;
+  }
+  .header-actions{ display:flex; align-items:center; gap:10px; }
+</style>
+</head>
+<body class="theme-light">
+
+<!-- ================= TELA DE LOGIN / CADASTRO ================= -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <span class="mark display">§</span>
+    <h2 class="display" id="authTitle">Entrar</h2>
+    <div class="sub" id="authSub">Acesse sua conta para ler ou escrever os capítulos.</div>
+
+    <div class="auth-error" id="authError"></div>
+    <div class="auth-msg" id="authMsg"></div>
+
+    <form id="authForm">
+      <div class="auth-field">
+        <label for="authEmail">E-mail</label>
+        <input type="email" id="authEmail" autocomplete="email" required>
+      </div>
+      <div class="auth-field">
+        <label for="authPassword">Senha</label>
+        <input type="password" id="authPassword" autocomplete="current-password" required minlength="6">
+      </div>
+      <button type="submit" class="btn btn-solid auth-submit" id="authSubmitBtn">Entrar</button>
+    </form>
+
+    <div class="auth-switch">
+      <span id="authSwitchText">Ainda não tem conta?</span>
+      <a id="authSwitchLink">Cadastre-se</a>
+    </div>
+  </div>
+</div>
+
+<!-- ================= TELA DE APROVAÇÃO PENDENTE ================= -->
+<div class="auth-screen hidden" id="pendingScreen">
+  <div class="auth-card auth-pending">
+    <span class="mark display">⏳</span>
+    <h2 class="display">Conta em análise</h2>
+    <div class="sub">Sua conta foi criada, mas ainda precisa ser aprovada pelo autor antes de você acessar os capítulos.</div>
+    <button class="btn btn-ghost" id="pendingRefreshBtn">↻ Verificar novamente</button>
+    <button class="btn btn-ghost" id="pendingLogoutBtn">Sair</button>
+  </div>
+</div>
+
+<!-- ================= APP (protegido) ================= -->
+<div class="hidden" id="appScreen">
+
+<header class="topbar">
+  <div class="brand">
+    <span class="mark display">§</span>
+    <div>
+      <h1 class="display">Law of Hunting</h1>
+      <div class="sub">Lout of Count's Family Pt2</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <span class="user-badge" id="userBadge"></span>
+    <div class="theme-switch" role="group" aria-label="Modo de leitura">
+      <button data-theme="light" title="Papel claro" aria-label="Papel claro">☀</button>
+      <button data-theme="sepia" title="Sépia" aria-label="Sépia">◐</button>
+      <button data-theme="dark" title="Tinta noturna" aria-label="Tinta noturna">☾</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" id="logoutBtn">Sair</button>
+  </div>
+</header>
+
+<main>
+  <div class="toc-header">
+    <div>
+      <div class="eyebrow">Sumário</div>
+      <h2 class="display" id="chapterCount">Capítulos</h2>
+    </div>
+    <div style="display:flex; gap:10px;" id="adminToolbar">
+      <button class="btn btn-ghost" id="exportBtn" title="Baixar todos os capítulos em um backup compactado">⇩ Exportar backup</button>
+      <button class="btn btn-ghost" id="importBtn" title="Importar capítulos de um arquivo de backup (.json ou .json.gz)">⇪ Importar backup</button>
+      <input type="file" id="importFileInput" accept="application/json,.json,.gz,.json.gz" style="display:none">
+      <button class="btn btn-solid" id="newChapterBtn">＋ Novo capítulo</button>
+    </div>
+  </div>
+  <div id="importStatus" style="display:none; margin:-6px 0 18px; font-size:13px; color:var(--ink-soft); font-style:italic;"></div>
+
+  <div class="library-layout">
+    <aside class="toc-panel">
+      <div id="listContainer">
+        <div class="loading-note">Abrindo o volume…</div>
+      </div>
+    </aside>
+    <section class="reading-panel" id="readingPanel">
+      <div class="reading-empty">
+        <span class="mark display">✒</span>
+        <h3>Nenhum capítulo aberto</h3>
+        <p>Selecione um capítulo ao lado para ler ou editar.</p>
+      </div>
+    </section>
+  </div>
+</main>
+
+</div><!-- /appScreen -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  // ======= CONFIGURAÇÃO DO SEU PROJETO SUPABASE =======
+  const SUPABASE_URL = 'https://npcxqonrldljhwmxuwkn.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wY3hxb25ybGRsamh3bXh1d2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU1NDk0ODAsImV4cCI6MjEwMTEyNTQ4MH0.shZ9LRL7gZL3jyYvyNFMLi-lo8GcHi7ue1kYT8ZqeuM';
+  // =====================================================
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const THEME_KEY = 'encadernado_law_of_hunting__theme';
+  let chapters = [];
+  let openId = null;
+  let editingId = null;
+  let ready = false;
+  let isAdmin = false;
+
+  // ---------- Elementos ----------
+  const authScreen = document.getElementById('authScreen');
+  const pendingScreen = document.getElementById('pendingScreen');
+  const appScreen = document.getElementById('appScreen');
+
+  const authForm = document.getElementById('authForm');
+  const authEmail = document.getElementById('authEmail');
+  const authPassword = document.getElementById('authPassword');
+  const authTitle = document.getElementById('authTitle');
+  const authSub = document.getElementById('authSub');
+  const authError = document.getElementById('authError');
+  const authMsg = document.getElementById('authMsg');
+  const authSubmitBtn = document.getElementById('authSubmitBtn');
+  const authSwitchText = document.getElementById('authSwitchText');
+  const authSwitchLink = document.getElementById('authSwitchLink');
+  const pendingRefreshBtn = document.getElementById('pendingRefreshBtn');
+  const pendingLogoutBtn = document.getElementById('pendingLogoutBtn');
+  const userBadge = document.getElementById('userBadge');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const adminToolbar = document.getElementById('adminToolbar');
+
+  const listContainer = document.getElementById('listContainer');
+  const readingPanel = document.getElementById('readingPanel');
+  const chapterCountEl = document.getElementById('chapterCount');
+  const newChapterBtn = document.getElementById('newChapterBtn');
+
+  // ---------- Tema (local, independente do login) ----------
+  function loadTheme(){
+    let theme = 'light';
+    try{
+      const saved = localStorage.getItem(THEME_KEY);
+      if(saved) theme = saved;
+    }catch(e){}
+    applyTheme(theme, false);
+  }
+  function applyTheme(theme, persist){
+    document.body.className = 'theme-' + theme;
+    document.querySelectorAll('.theme-switch button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.theme === theme);
+    });
+    if(persist){
+      try{ localStorage.setItem(THEME_KEY, theme); }catch(e){}
+    }
+  }
+  document.querySelectorAll('.theme-switch button').forEach(btn=>{
+    btn.addEventListener('click', ()=> applyTheme(btn.dataset.theme, true));
+  });
+  loadTheme();
+
+  // ---------- Autenticação ----------
+  let authMode = 'login'; // 'login' | 'signup'
+
+  function showScreen(name){
+    authScreen.classList.toggle('hidden', name !== 'auth');
+    pendingScreen.classList.toggle('hidden', name !== 'pending');
+    appScreen.classList.toggle('hidden', name !== 'app');
+  }
+
+  function setAuthMode(mode){
+    authMode = mode;
+    authError.style.display = 'none';
+    authMsg.style.display = 'none';
+    if(mode === 'login'){
+      authTitle.textContent = 'Entrar';
+      authSub.textContent = 'Acesse sua conta para ler ou escrever os capítulos.';
+      authSubmitBtn.textContent = 'Entrar';
+      authSwitchText.textContent = 'Ainda não tem conta?';
+      authSwitchLink.textContent = 'Cadastre-se';
+    } else {
+      authTitle.textContent = 'Criar conta';
+      authSub.textContent = 'Sua conta será enviada para aprovação do autor antes de liberar o acesso.';
+      authSubmitBtn.textContent = 'Cadastrar';
+      authSwitchText.textContent = 'Já tem conta?';
+      authSwitchLink.textContent = 'Entrar';
+    }
+  }
+  authSwitchLink.addEventListener('click', ()=> setAuthMode(authMode === 'login' ? 'signup' : 'login'));
+
+  authForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    authError.style.display = 'none';
+    authMsg.style.display = 'none';
+    const email = authEmail.value.trim();
+    const password = authPassword.value;
+    authSubmitBtn.disabled = true;
+    const originalText = authSubmitBtn.textContent;
+    authSubmitBtn.textContent = 'Aguarde…';
+
+    try{
+      if(authMode === 'login'){
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if(error) throw error;
+        // onAuthStateChange cuida do resto
+      } else {
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if(error) throw error;
+        if(data.session){
+          // confirmação de e-mail desativada no projeto: já entra direto (ficará em "aprovação pendente")
+        } else {
+          authMsg.style.display = 'block';
+          authMsg.textContent = 'Conta criada! Verifique seu e-mail para confirmar o cadastro e depois faça login.';
+          setAuthMode('login');
+        }
+      }
+    }catch(err){
+      authError.style.display = 'block';
+      authError.textContent = traduzErroAuth(err.message);
+    }finally{
+      authSubmitBtn.disabled = false;
+      authSubmitBtn.textContent = originalText;
+    }
+  });
+
+  function traduzErroAuth(msg){
+    if(/invalid login credentials/i.test(msg)) return 'E-mail ou senha incorretos.';
+    if(/user already registered/i.test(msg)) return 'Já existe uma conta com esse e-mail.';
+    if(/password should be at least/i.test(msg)) return 'A senha precisa ter pelo menos 6 caracteres.';
+    return msg;
+  }
+
+  async function checkSession(){
+    const { data: { session } } = await supabase.auth.getSession();
+    if(!session){ showScreen('auth'); return; }
+    await handleLoggedIn(session.user);
+  }
+
+  async function handleLoggedIn(user){
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('approved,is_admin,email')
+      .eq('id', user.id)
+      .single();
+
+    if(error || !profile || !profile.approved){
+      showScreen('pending');
+      return;
+    }
+    isAdmin = !!profile.is_admin;
+    userBadge.textContent = profile.email + (isAdmin ? ' · autor(a)' : ' · leitor(a)');
+    adminToolbar.style.display = isAdmin ? 'flex' : 'none';
+    showScreen('app');
+    loadChapters();
+  }
+
+  supabase.auth.onAuthStateChange((event, session)=>{
+    if(event === 'SIGNED_OUT'){
+      isAdmin = false; chapters = []; ready = false; openId = null; editingId = null;
+      authEmail.value=''; authPassword.value='';
+      setAuthMode('login');
+      showScreen('auth');
+    } else if(session){
+      handleLoggedIn(session.user);
+    }
+  });
+
+  pendingRefreshBtn.addEventListener('click', async ()=>{
+    const { data: { session } } = await supabase.auth.getSession();
+    if(session) handleLoggedIn(session.user);
+  });
+  pendingLogoutBtn.addEventListener('click', ()=> supabase.auth.signOut());
+  logoutBtn.addEventListener('click', ()=> supabase.auth.signOut());
+
+  // ---------- Dados (capítulos via Supabase) ----------
+  async function loadChapters(){
+    ready = false;
+    const { data, error } = await supabase
+      .from('chapters')
+      .select('*')
+      .order('seq', { ascending: true });
+    if(error){
+      console.error(error);
+      chapters = [];
+    } else {
+      chapters = data || [];
+    }
+    ready = true;
+    render();
+  }
+
+  function formatDate(iso){
+    if(!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
+  }
+
+  function plainPreview(html){
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html || '';
+    const text = (tmp.textContent || '').trim();
+    return text.length > 0;
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  function escapeAttr(str){ return escapeHtml(str); }
+
+  // ---------- Render ----------
+  function render(){
+    renderTocList();
+    renderReadingPanel();
+  }
+
+  function renderTocList(){
+    if(!ready){
+      listContainer.innerHTML = '<div class="loading-note">Abrindo o volume…</div>';
+      return;
+    }
+    chapterCountEl.textContent = chapters.length === 1 ? '1 capítulo' : chapters.length + ' capítulos';
+
+    if(chapters.length === 0){
+      listContainer.innerHTML = `
+        <div class="empty-state">
+          <span class="mark display">✒</span>
+          <h3>Ainda não há capítulos</h3>
+          <p>${isAdmin ? 'Comece o primeiro capítulo do seu livro.' : 'O autor ainda não publicou nenhum capítulo.'}</p>
+        </div>`;
+      return;
+    }
+
+    const ul = document.createElement('ul');
+    ul.className = 'spine-list';
+    chapters.forEach((ch, idx) => ul.appendChild(buildTocItem(ch, idx)));
+    listContainer.innerHTML = '';
+    listContainer.appendChild(ul);
+  }
+
+  function buildTocItem(ch, idx){
+    const li = document.createElement('li');
+    const isActive = (openId === ch.id) || (editingId === ch.id);
+    li.className = 'chapter' + (isActive ? ' active' : '');
+
+    const head = document.createElement('div');
+    head.className = 'chapter-head';
+    head.innerHTML = `
+      <span class="chev">❯</span>
+      <span class="num">${String(idx+1).padStart(2,'0')}</span>
+      <span class="title-block">
+        <div class="title">${escapeHtml(ch.title || 'Sem título')}</div>
+        <div class="meta">Atualizado em ${formatDate(ch.updated_at)}</div>
+      </span>
+    `;
+    if(isAdmin){
+      const actions = document.createElement('div');
+      actions.className = 'chapter-actions';
+      actions.innerHTML = `
+        <button class="btn btn-ghost btn-sm" data-act="edit">Editar</button>
+        <button class="btn btn-danger btn-sm" data-act="delete">Excluir</button>
+      `;
+      head.appendChild(actions);
+      actions.querySelector('[data-act="edit"]').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        editingId = ch.id;
+        openId = ch.id;
+        render();
+      });
+      actions.querySelector('[data-act="delete"]').addEventListener('click', async (e)=>{
+        e.stopPropagation();
+        if(!confirm(`Excluir o capítulo "${ch.title || 'sem título'}"? Essa ação não pode ser desfeita.`)) return;
+        const { error } = await supabase.from('chapters').delete().eq('id', ch.id);
+        if(error){ alert('Não foi possível excluir: ' + error.message); return; }
+        if(openId === ch.id) openId = null;
+        if(editingId === ch.id) editingId = null;
+        await loadChapters();
+      });
+    }
+
+    head.addEventListener('click', (e)=>{
+      if(e.target.closest('[data-act]')) return;
+      if(editingId && editingId !== ch.id) editingId = null;
+      openId = (openId === ch.id && editingId !== ch.id) ? null : ch.id;
+      render();
+    });
+
+    li.appendChild(head);
+    return li;
+  }
+
+  // ---------- Painel de leitura ----------
+  function renderReadingPanel(){
+    readingPanel.innerHTML = '';
+
+    if(isAdmin && editingId === 'new'){
+      readingPanel.appendChild(buildEditorPanel(null));
+      return;
+    }
+    if(isAdmin && editingId){
+      const chEdit = chapters.find(c => c.id === editingId);
+      if(chEdit){ readingPanel.appendChild(buildEditorPanel(chEdit)); return; }
+      editingId = null;
+    }
+    if(openId){
+      const chOpen = chapters.find(c => c.id === openId);
+      if(chOpen){ readingPanel.appendChild(buildReadingView(chOpen)); return; }
+      openId = null;
+    }
+
+    readingPanel.innerHTML = `
+      <div class="reading-empty">
+        <span class="mark display">✒</span>
+        <h3>Nenhum capítulo aberto</h3>
+        <p>Selecione um capítulo ao lado para ler${isAdmin ? ' ou editar' : ''}.</p>
+      </div>`;
+  }
+
+  function buildReadingView(ch){
+    const wrap = document.createElement('div');
+    wrap.className = 'reading-panel-inner';
+
+    const top = document.createElement('div');
+    top.className = 'reading-topbar';
+    top.innerHTML = `
+      <div>
+        <h2 class="chapter-title display">${escapeHtml(ch.title || 'Sem título')}</h2>
+        <div class="meta">Atualizado em ${formatDate(ch.updated_at)}</div>
+      </div>
+      <div class="chapter-actions">
+        ${isAdmin ? '<button class="btn btn-ghost btn-sm" data-act="edit">Editar</button><button class="btn btn-danger btn-sm" data-act="delete">Excluir</button>' : ''}
+        <button class="btn btn-ghost btn-sm" data-act="close">Fechar</button>
+      </div>
+    `;
+    if(isAdmin){
+      top.querySelector('[data-act="edit"]').addEventListener('click', ()=>{ editingId = ch.id; render(); });
+      top.querySelector('[data-act="delete"]').addEventListener('click', async ()=>{
+        if(!confirm(`Excluir o capítulo "${ch.title || 'sem título'}"? Essa ação não pode ser desfeita.`)) return;
+        const { error } = await supabase.from('chapters').delete().eq('id', ch.id);
+        if(error){ alert('Não foi possível excluir: ' + error.message); return; }
+        openId = null;
+        await loadChapters();
+      });
+    }
+    top.querySelector('[data-act="close"]').addEventListener('click', ()=>{ openId = null; render(); });
+
+    const content = document.createElement('div');
+    content.innerHTML = plainPreview(ch.content)
+      ? `<div class="reading-content">${ch.content}</div>`
+      : `<div class="empty-note">${isAdmin ? 'Este capítulo ainda não tem texto. Clique em Editar para escrever.' : 'Este capítulo ainda não tem texto.'}</div>`;
+
+    wrap.appendChild(top);
+    wrap.appendChild(content);
+    return wrap;
+  }
+
+  function buildEditorPanel(ch){
+    const isNew = !ch;
+    const wrap = document.createElement('div');
+    wrap.className = 'reading-panel-inner editor-wrap';
+
+    const titleId = 'title_' + (isNew ? 'new' : ch.id);
+    const rteId = 'rte_' + (isNew ? 'new' : ch.id);
+
+    wrap.innerHTML = `
+      <div class="reading-topbar" style="border-bottom:none; margin-bottom:6px; padding-bottom:0;">
+        <div><h2 class="chapter-title display">${isNew ? 'Novo capítulo' : 'Editando capítulo'}</h2></div>
+      </div>
+      <span class="field-label">Título do capítulo</span>
+      <input type="text" class="title-input" id="${titleId}" placeholder="Ex.: Capítulo 1 — O começo" value="${isNew ? '' : escapeAttr(ch.title || '')}" />
+
+      <span class="field-label">Texto</span>
+      <div class="toolbar" data-target="${rteId}">
+        <button type="button" data-cmd="bold" title="Negrito"><b>B</b></button>
+        <button type="button" data-cmd="italic" title="Itálico"><i>I</i></button>
+        <button type="button" data-cmd="underline" title="Sublinhado"><u>S</u></button>
+        <button type="button" data-cmd="strikeThrough" title="Tachado"><s>T</s></button>
+        <div class="sep"></div>
+        <button type="button" data-cmd="formatBlock" data-val="H1" title="Título 1">H1</button>
+        <button type="button" data-cmd="formatBlock" data-val="H2" title="Título 2">H2</button>
+        <button type="button" data-cmd="formatBlock" data-val="P" title="Parágrafo">¶</button>
+        <button type="button" data-cmd="formatBlock" data-val="BLOCKQUOTE" title="Citação">❝</button>
+        <div class="sep"></div>
+        <button type="button" data-cmd="insertUnorderedList" title="Lista">•—</button>
+        <button type="button" data-cmd="insertOrderedList" title="Lista numerada">1.</button>
+        <div class="sep"></div>
+        <button type="button" data-cmd="createLink" title="Inserir link">🔗</button>
+        <button type="button" data-cmd="removeFormat" title="Limpar formatação">⌫</button>
+        <div class="sep"></div>
+        <button type="button" data-cmd="undo" title="Desfazer">↺</button>
+        <button type="button" data-cmd="redo" title="Refazer">↻</button>
+      </div>
+      <div class="rte" id="${rteId}" contenteditable="true" data-placeholder="Escreva o capítulo aqui...">${isNew ? '' : (ch.content || '')}</div>
+
+      <div class="editor-footer">
+        <button class="btn btn-ghost" data-act="cancel">Cancelar</button>
+        <button class="btn btn-solid" data-act="save">Salvar capítulo</button>
+      </div>
+    `;
+
+    wrap.querySelectorAll('.toolbar button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const rte = document.getElementById(rteId);
+        rte.focus();
+        const cmd = btn.dataset.cmd;
+        if(cmd === 'createLink'){
+          const url = prompt('Endereço do link (https://...)');
+          if(url) document.execCommand('createLink', false, url);
+        } else if(cmd === 'formatBlock'){
+          document.execCommand('formatBlock', false, btn.dataset.val);
+        } else {
+          document.execCommand(cmd, false, null);
+        }
+      });
+    });
+
+    wrap.querySelector('[data-act="cancel"]').addEventListener('click', ()=>{
+      editingId = null;
+      render();
+    });
+
+    wrap.querySelector('[data-act="save"]').addEventListener('click', async ()=>{
+      const titleVal = document.getElementById(titleId).value.trim();
+      const contentVal = document.getElementById(rteId).innerHTML;
+      if(!titleVal){
+        alert('Dê um título ao capítulo antes de salvar.');
+        document.getElementById(titleId).focus();
+        return;
+      }
+      const saveBtn = wrap.querySelector('[data-act="save"]');
+      saveBtn.disabled = true;
+      const originalLabel = saveBtn.textContent;
+      saveBtn.textContent = 'Salvando…';
+
+      try{
+        if(isNew){
+          const { data, error } = await supabase
+            .from('chapters')
+            .insert({ title: titleVal, content: contentVal })
+            .select()
+            .single();
+          if(error) throw error;
+          openId = data.id;
+        } else {
+          const { error } = await supabase
+            .from('chapters')
+            .update({ title: titleVal, content: contentVal, updated_at: new Date().toISOString() })
+            .eq('id', ch.id);
+          if(error) throw error;
+          openId = ch.id;
+        }
+        editingId = null;
+        await loadChapters();
+      }catch(err){
+        alert('Não foi possível salvar: ' + err.message);
+        saveBtn.disabled = false;
+        saveBtn.textContent = originalLabel;
+      }
+    });
+
+    return wrap;
+  }
+
+  newChapterBtn.addEventListener('click', ()=>{
+    editingId = 'new';
+    openId = null;
+    render();
+    setTimeout(()=>{
+      const el = document.getElementById('title_new');
+      if(el) el.focus();
+    }, 50);
+  });
+
+  // ---------- Compactação (gzip nativo do navegador) ----------
+  const supportsCompression = typeof CompressionStream !== 'undefined' && typeof DecompressionStream !== 'undefined';
+
+  async function gzipCompress(text){
+    const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
+    const buf = await new Response(stream).arrayBuffer();
+    return new Uint8Array(buf);
+  }
+  async function gzipDecompress(uint8arr){
+    const stream = new Blob([uint8arr]).stream().pipeThrough(new DecompressionStream('gzip'));
+    const buf = await new Response(stream).arrayBuffer();
+    return new TextDecoder('utf-8').decode(buf);
+  }
+  function looksGzipped(bytes){
+    return bytes.length > 2 && bytes[0] === 0x1f && bytes[1] === 0x8b;
+  }
+  function formatBytes(n){
+    if(n < 1024) return n + ' B';
+    if(n < 1024*1024) return (n/1024).toFixed(1) + ' KB';
+    return (n/1024/1024).toFixed(2) + ' MB';
+  }
+  function minifyHtml(html){
+    if(!html) return '';
+    return html
+      .replace(/<p>(\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, '')
+      .replace(/>\s+</g, '><')
+      .trim();
+  }
+  function textToHtml(text){
+    if(text == null) return '';
+    if(/<\/?[a-z][\s\S]*>/i.test(text)) return text;
+    const paragraphs = String(text).split(/\n\s*\n/);
+    return paragraphs
+      .map(p => p.trim())
+      .filter(p => p.length > 0)
+      .map(p => '<p>' + escapeHtml(p).replace(/\n/g, '<br>') + '</p>')
+      .join('');
+  }
+
+  const importStatus = document.getElementById('importStatus');
+  function showStatus(msg){
+    importStatus.style.display = 'block';
+    importStatus.textContent = msg;
+    setTimeout(()=>{ importStatus.style.display = 'none'; }, 7000);
+  }
+
+  // ---------- Exportar backup ----------
+  const exportBtn = document.getElementById('exportBtn');
+  exportBtn.addEventListener('click', async ()=>{
+    if(chapters.length === 0){ alert('Ainda não há capítulos para exportar.'); return; }
+    exportBtn.disabled = true;
+    const originalLabel = exportBtn.textContent;
+    exportBtn.textContent = 'Compactando…';
+    try{
+      const backupData = chapters.map(c => ({ title: c.title, content: minifyHtml(c.content) }));
+      const jsonStr = JSON.stringify(backupData);
+      const rawSize = new Blob([jsonStr]).size;
+      const dateStr = new Date().toISOString().slice(0,10);
+      let blob, filename;
+
+      if(supportsCompression){
+        const gz = await gzipCompress(jsonStr);
+        blob = new Blob([gz], { type: 'application/gzip' });
+        filename = `encadernado-backup-${dateStr}.json.gz`;
+        showStatus(`Backup exportado e compactado: ${formatBytes(rawSize)} → ${formatBytes(blob.size)} (${Math.round((1 - blob.size/rawSize)*100)}% menor).`);
+      } else {
+        blob = new Blob([jsonStr], { type: 'application/json' });
+        filename = `encadernado-backup-${dateStr}.json`;
+        showStatus(`Backup exportado: ${formatBytes(blob.size)}.`);
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }catch(err){
+      console.error(err);
+      alert('Não foi possível gerar o backup.');
+    }finally{
+      exportBtn.disabled = false;
+      exportBtn.textContent = originalLabel;
+    }
+  });
+
+  // ---------- Importar backup ----------
+  const importBtn = document.getElementById('importBtn');
+  const importFileInput = document.getElementById('importFileInput');
+  importBtn.addEventListener('click', ()=> importFileInput.click());
+
+  importFileInput.addEventListener('change', (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev)=>{
+      try{
+        const bytes = new Uint8Array(ev.target.result);
+        let text;
+        if(looksGzipped(bytes)){
+          if(!supportsCompression){
+            alert('Este arquivo está compactado e seu navegador não suporta descompactação.');
+            return;
+          }
+          text = await gzipDecompress(bytes);
+        } else {
+          text = new TextDecoder('utf-8').decode(bytes);
+        }
+        const raw = JSON.parse(text);
+        const list = Array.isArray(raw) ? raw : (Array.isArray(raw.chapters) ? raw.chapters : null);
+        if(!list) throw new Error('Formato inesperado');
+        await importChapters(list);
+      }catch(err){
+        console.error(err);
+        alert('Não foi possível ler esse arquivo. Verifique se é um backup .json ou .json.gz válido.');
+      }
+    };
+    reader.onerror = ()=> alert('Erro ao ler o arquivo.');
+    reader.readAsArrayBuffer(file);
+    importFileInput.value = '';
+  });
+
+  async function importChapters(rawList){
+    const existingTitles = new Set(chapters.map(c => (c.title||'').trim().toLowerCase()));
+    const sorted = rawList.slice().sort((a,b)=>{
+      const ai = typeof a.id === 'number' ? a.id : 0;
+      const bi = typeof b.id === 'number' ? b.id : 0;
+      return ai - bi;
+    });
+
+    const rows = [];
+    let skipped = 0;
+    sorted.forEach(item=>{
+      const title = (item.title || 'Sem título').trim();
+      const titleKey = title.toLowerCase();
+      if(existingTitles.has(titleKey)){ skipped++; return; }
+      rows.push({ title, content: textToHtml(item.content) });
+      existingTitles.add(titleKey);
+    });
+
+    if(rows.length === 0){
+      showStatus(`Nenhum capítulo novo para importar` + (skipped ? ` (${skipped} já existiam).` : '.'));
+      return;
+    }
+
+    importBtn.disabled = true;
+    try{
+      const { error } = await supabase.from('chapters').insert(rows);
+      if(error) throw error;
+      await loadChapters();
+      showStatus(`Importação concluída: ${rows.length} capítulo(s) adicionado(s)` + (skipped ? `, ${skipped} ignorado(s) por já existirem.` : '.'));
+    }catch(err){
+      alert('Não foi possível importar: ' + err.message);
+    }finally{
+      importBtn.disabled = false;
+    }
+  }
+
+  // ---------- Início ----------
+  setAuthMode('login');
+  checkSession();
+})();
+</script>
+</body>
+</html>
